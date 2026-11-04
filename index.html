@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testez avant d'acheter — Échantillons de whey au Maroc</title>
+<meta name="description" content="Composez votre lot d'échantillons de whey : 4 échantillons pour 80 DH, puis 15 DH l'unité. Paiement à la livraison, commande via WhatsApp.">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  [x-cloak]{display:none!important}
+  html{scroll-behavior:smooth}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#fff;color:#0a0a0a}
+  .hero-shell{color:#fff;background:radial-gradient(ellipse at 12% 0%, rgba(220,38,38,.62), transparent 42%), linear-gradient(135deg, #151515 0%, #050505 72%); border:2px solid #1f1f1f; border-radius:1.5rem; box-shadow:0 0 0 1px rgba(239,68,68,.08), inset 0 0 30px rgba(239,68,68,.08)}
+  .hero-shell .text-neutral-600, .hero-shell .text-neutral-500 { color:rgba(255,255,255,.72) !important }
+  .hero-shell .text-black, .hero-shell strong.text-black { color:#fff !important }
+  .hero-shell .border-black { border-color:rgba(255,255,255,.18) !important }
+  .hero-shell .bg-neutral-200 { background:rgba(255,255,255,.09) !important }
+  .hero-shell .bg-red-600 { background:linear-gradient(90deg, #ef4444, #dc2626) !important }
+  .hero-shell .text-red-600 { color:#f87171 !important }
+  .hero-title{font-size:clamp(2rem,8vw,3.75rem);overflow-wrap:anywhere}
+  .hero-tagline{display:block;font-size:clamp(1.2rem,5vw,2.1rem);line-height:1.1;overflow-wrap:anywhere}
+  @media(max-width:480px){
+    .hero-shell{padding:1.5rem 1rem 1.25rem !important}
+    .hero-shell #builder{padding:1rem}
+    .hero-shell #builder>div:first-child{align-items:flex-start;flex-direction:column;gap:.25rem}
+  }
+  @media(max-width:360px){
+    .product-grid{grid-template-columns:minmax(0,1fr) !important}
+  }
+  /* Flip card (CSS 3D) */
+  .scene{perspective:1000px}
+  .flipper{position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,.2,.2,1);height:21rem}
+  .flipper.is-flipped{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid #0a0a0a;background:#fff;border-radius:1rem;overflow:hidden}
+  .face.back{transform:rotateY(180deg)}
+  @media (prefers-reduced-motion:reduce){.flipper{transition:none}}
+  .bar{transition:width .4s ease, background-color .3s ease}
+  .pop{animation:pop .35s ease}
+  @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+/* ======= CONFIGURATION — à adapter ======= */
+const CONFIG = {
+  whatsapp: '212607549032',
+  deliveryFee: 20,
+  minSamples: 3,
+  basePrice: 60,        // prix des 3 premiers échantillons
+  extraPrice: 15,       // prix de chaque échantillon supplémentaire
+  instagram: '',        // ex: 'https://www.instagram.com/votre_boutique'
+  brandSites: {         // sites officiels des marques (affichés dans le footer si renseignés)
+    'Tesla Supplements': '',
+    'Lazar Angelov Nutrition': ''
+  }
+};
+
+const PRODUCTS = [
+  { brand:'Tesla Supplements', name:'Whey Charger 100', type:'Concentré', portion:'32 g', protein:'25 g',
+    extra:'Complexe DigeZyme® · enrichi en BCAA et L-glutamine · env. 2,6 g de glucides',
+    flavors:['Chocolate','Raspberries','Cookies','Vanilla'], color:'#0a0a0a' },
+  { brand:'Lazar Angelov Nutrition', name:'Whey Protein', type:'Concentré', portion:'30 g', protein:'23 g',
+    extra:'Bromélaïne · papaïne · lactase · BCAA ratio 2:1:1',
+    flavors:['Chocolate','Pistachio'], color:'#b91c1c' }
+];
+
+const PRODUCT_IMAGES = {
+  'tesla-chocolate': 'assets/tesla-choc.png',
+  'tesla-raspberries': 'assets/tesla-rasp.png',
+  'tesla-cookies': 'assets/tesla-cookie.png',
+  'tesla-vanilla': 'assets/tesla-vanilla.png',
+  'lazar-chocolate': 'assets/lazar-choc.png',
+  'lazar-pistachio': 'assets/lazar-pistachio.png'
+};
+
+const NUTRITION_IMAGES = {
+  'tesla-chocolate': 'assets/tesla-nutrition.png',
+  'tesla-raspberries': 'assets/tesla-nutrition.png',
+  'tesla-cookies': 'assets/tesla-nutrition.png',
+  'tesla-vanilla': 'assets/tesla-nutrition.png',
+  'lazar-chocolate': 'assets/lazar-nutrition-facts.png',
+  'lazar-pistachio': 'assets/lazar-nutrition-facts.png'
+};
+
+const SAMPLES = PRODUCTS.flatMap(p => p.flavors.map(f => {
+  const sample = {
+    id: (p.brand.split(' ')[0] + '-' + f).toLowerCase(),
+    brand:p.brand, name:p.name, type:p.type, portion:p.portion, protein:p.protein, extra:p.extra, flavor:f, color:p.color
+  };
+  const key = `${p.brand.split(' ')[0].toLowerCase()}-${f.toLowerCase()}`;
+  sample.image = PRODUCT_IMAGES[key] || PRODUCT_IMAGES[Object.keys(PRODUCT_IMAGES).find(k => k.startsWith(`${p.brand.split(' ')[0].toLowerCase()}-`))] || 'assets/whey-pack.svg';
+  sample.nutritionImage = NUTRITION_IMAGES[key];
+  return sample;
+}));
+
+function bundlePrice(n){
+  if(n < CONFIG.minSamples) return 0;
+  return CONFIG.basePrice + (n - CONFIG.minSamples) * CONFIG.extraPrice;
+}
+
+function shop(){
+  return {
+    samples: SAMPLES,
+    cart: Alpine.$persist({}).as('whey_bundle_v1'),
+    fBrand:'', fFlavor:'', fType:'',
+    drawer:false, toast:'', toastKey:0,
+    form: Alpine.$persist({name:'', city:''}).as('whey_customer_v1'),
+    cfg: CONFIG,
+
+    get brands(){ return [...new Set(SAMPLES.map(s=>s.brand))] },
+    get flavorsList(){ return [...new Set(SAMPLES.map(s=>s.flavor))] },
+    get types(){ return [...new Set(SAMPLES.map(s=>s.type))] },
+    get filtered(){
+      return this.samples.filter(s =>
+        (!this.fBrand || s.brand===this.fBrand) &&
+        (!this.fFlavor || s.flavor===this.fFlavor) &&
+        (!this.fType || s.type===this.fType));
+    },
+    get count(){ return Object.values(this.cart).reduce((a,b)=>a+b,0) },
+    get missing(){ return Math.max(0, CONFIG.minSamples - this.count) },
+    get unlocked(){ return this.count >= CONFIG.minSamples },
+    get subtotal(){ return bundlePrice(this.count) },
+    get total(){ return this.unlocked ? this.subtotal + CONFIG.deliveryFee : 0 },
+    get progress(){ return Math.min(100, Math.round(this.count / CONFIG.minSamples * 100)) },
+    get lines(){
+      return Object.entries(this.cart).map(([id,q]) => ({s:SAMPLES.find(x=>x.id===id), q})).filter(l=>l.s && l.q>0);
+    },
+    get canSend(){ return this.unlocked && this.form.name.trim().length > 1 && this.form.city.trim().length > 1 },
+    qty(id){ return this.cart[id] || 0 },
+    say(msg){ this.toast = msg; const k = ++this.toastKey; setTimeout(()=>{ if(k===this.toastKey) this.toast='' }, 1800) },
+    add(id){
+      const before = this.count;
+      this.cart = {...this.cart, [id]:(this.cart[id]||0)+1};
+      if(before+1 === CONFIG.minSamples) this.say('Lot débloqué : 60 DH 🎉');
+      else if(before+1 > CONFIG.minSamples) this.say('+15 DH : tarif préférentiel appliqué');
+      else this.say(`Encore ${CONFIG.minSamples-(before+1)} pour débloquer le lot`);
+    },
+    remove(id){
+      const q = (this.cart[id]||0) - 1;
+      const c = {...this.cart};
+      if(q<=0) delete c[id]; else c[id]=q;
+      this.cart = c;
+    },
+    clear(){ this.cart = {} },
+    whatsappUrl(){
+      const rows = this.lines.map(l => `• ${l.q} × ${l.s.brand} ${l.s.name} — ${l.s.flavor}`);
+      const msg = [
+        'Bonjour ! Je souhaite commander mon lot d\'échantillons :',
+        '',
+        ...rows,
+        '',
+        `Nombre d'échantillons : ${this.count}`,
+        `Sous-total : ${this.subtotal} DH`,
+        `Livraison : ${CONFIG.deliveryFee} DH`,
+        `Total à payer à la livraison : ${this.total} DH`,
+        '',
+        `Nom : ${this.form.name.trim()}`,
+        `Ville : ${this.form.city.trim()}`
+      ].join('\n');
+      return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
+    },
+    send(){ if(this.canSend) window.open(this.whatsappUrl(), '_blank', 'noopener'); }
+  }
+}
+</script>
+</head>
+
+<body x-data="shop()" x-cloak @keydown.escape.window="drawer=false" class="antialiased">
+
+<!-- Barre supérieure -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b-2 border-black">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="#top" class="font-black tracking-tight text-lg">WHEY<span class="text-red-600">SIMPLE</span></a>
+    <nav class="hidden sm:flex gap-6 text-sm font-semibold">
+      <a href="#builder" class="hover:text-red-600">Composer mon lot</a>
+      <a href="#savoir" class="hover:text-red-600">Comprendre la whey</a>
+    </nav>
+    <button @click="drawer=true" class="relative border-2 border-black rounded-full px-4 py-1.5 text-sm font-bold hover:bg-black hover:text-white transition" aria-label="Ouvrir mon panier">
+      Mon panier <span class="ml-1 inline-flex items-center justify-center min-w-[1.4rem] h-[1.4rem] rounded-full bg-red-600 text-white text-xs px-1" x-text="count"></span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Hero + Bundle Builder -->
+  <section class="hero-shell max-w-6xl mx-auto px-4 pt-10 pb-6">
+    <p class="text-xs font-bold uppercase tracking-widest text-red-600">Échantillons · Paiement à la livraison</p>
+    <h1 class="hero-title mt-2 font-black leading-[1.05] tracking-tight max-w-3xl">Goûte avant d'acheter<span class="hero-tagline mt-2">#DO9_9BEL_MA_TCHRI</span></h1>
+    <p class="mt-4 max-w-xl text-neutral-600">Compose ton lot en mélangeant n'importe quelle saveur de n'importe quelle marque. <strong class="text-black">3 échantillons = 60 DH</strong>, puis <strong class="text-black">15 DH</strong> par échantillon en plus.</p>
+
+    <!-- Barre de progression gamifiée -->
+    <div id="builder" class="mt-8 border-2 border-black rounded-2xl p-5 scroll-mt-20">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-neutral-500">Ton lot</p>
+          <p class="text-lg font-black" x-show="!unlocked" x-text="`Ajoute encore ${missing} échantillon${missing>1?'s':''} pour débloquer ton lot`"></p>
+          <p class="text-lg font-black text-green-700" x-show="unlocked" x-text="count===cfg.minSamples ? 'Lot débloqué : 60 DH' : `Lot débloqué : ${subtotal} DH (15 DH par échantillon en plus)`"></p>
+        </div>
+        <p class="text-3xl font-black tabular-nums" :class="unlocked ? 'text-green-700' : ''" x-text="`${count}/${cfg.minSamples}${count>cfg.minSamples?'+':''}`"></p>
+      </div>
+      <div class="mt-3 h-4 rounded-full bg-neutral-200 overflow-hidden" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100" aria-label="Progression du lot">
+        <div class="bar h-full rounded-full" :class="unlocked ? 'bg-green-600' : 'bg-red-600'" :style="`width:${progress}%`"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filtres -->
+  <section class="max-w-6xl mx-auto px-4 py-4">
+    <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-bold">Type</span>
+        <button @click="fType=''" :class="!fType ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold">Tous</button>
+        <template x-for="t in types" :key="t">
+          <button @click="fType=t" :class="fType===t ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold" x-text="t"></button>
+        </template>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-bold">Marque</span>
+        <button @click="fBrand=''" :class="!fBrand ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold">Toutes</button>
+        <template x-for="b in brands" :key="b">
+          <button @click="fBrand=b" :class="fBrand===b ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold" x-text="b"></button>
+        </template>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-bold">Saveur</span>
+        <button @click="fFlavor=''" :class="!fFlavor ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold">Toutes</button>
+        <template x-for="f in flavorsList" :key="f">
+          <button @click="fFlavor=f" :class="fFlavor===f ? 'bg-black text-white' : ''" class="border-2 border-black rounded-full px-3 py-1 font-semibold" x-text="f"></button>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalogue : flip cards -->
+  <section class="max-w-6xl mx-auto px-4 pb-16">
+    <p class="text-sm text-neutral-500 mb-4" x-show="filtered.length===0">Aucun échantillon ne correspond à ces filtres.</p>
+    <div class="product-grid grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <template x-for="s in filtered" :key="s.id">
+        <article x-data="{flipped:false}">
+          <div class="scene">
+            <div class="flipper" :class="flipped && 'is-flipped'">
+              <!-- Recto -->
+              <div class="face" :aria-hidden="flipped ? 'true' : 'false'">
+                <button type="button" class="w-full h-full flex flex-col items-center justify-between p-4 text-left" @click="flipped=true" :tabindex="flipped ? -1 : 0" :aria-label="`Voir les valeurs nutritionnelles : ${s.brand} ${s.flavor}`">
+                  <span class="self-start text-[10px] font-bold uppercase tracking-widest border border-black rounded-full px-2 py-0.5" x-text="s.type"></span>
+                  <!-- Sachet -->
+                  <img :src="s.image" :alt="`Image du produit ${s.brand} ${s.flavor}`" class="w-24 sm:w-32 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.18)]" />
+                  <span class="w-full">
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500" x-text="s.brand"></span>
+                    <span class="block font-black text-lg leading-tight" x-text="s.flavor"></span>
+                    <span class="block text-xs text-neutral-500 mt-1">Toucher pour voir le détail ↻</span>
+                  </span>
+                </button>
+              </div>
+              <!-- Verso -->
+              <div class="face back" :aria-hidden="flipped ? 'false' : 'true'">
+                <button type="button" class="w-full h-full flex items-center justify-center p-2" @click="flipped=false" :tabindex="flipped ? 0 : -1" :aria-label="`Retourner à l’image du produit ${s.brand} ${s.flavor}`">
+                  <img :src="s.nutritionImage" :alt="`Valeurs nutritionnelles de ${s.brand} ${s.flavor}`" class="w-full h-full object-contain" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions (hors de la carte, toujours accessibles) -->
+          <div class="mt-3 flex items-center gap-2">
+            <button type="button" @click="add(s.id)" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-2.5 text-sm transition active:scale-95" :aria-label="`Ajouter ${s.brand} ${s.flavor} au panier`">
+              + Ajouter
+            </button>
+            <div x-show="qty(s.id)>0" class="flex items-center border-2 border-black rounded-full overflow-hidden">
+              <button type="button" @click="remove(s.id)" class="w-8 h-9 font-black hover:bg-black hover:text-white" aria-label="Retirer un">−</button>
+              <span class="w-6 text-center font-black text-sm tabular-nums" x-text="qty(s.id)"></span>
+            </div>
+          </div>
+        </article>
+      </template>
+    </div>
+  </section>
+
+  <!-- Section éducative -->
+  <section id="savoir" class="border-y-2 border-black bg-white scroll-mt-14">
+    <div class="max-w-6xl mx-auto px-4 py-16">
+      <p class="text-xs font-bold uppercase tracking-widest text-red-600">Comprendre</p>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-black tracking-tight max-w-2xl">La whey, ce n'est pas que pour les bodybuilders.</h2>
+
+      <div class="mt-10 grid md:grid-cols-2 gap-6">
+        <div class="border-2 border-black rounded-2xl p-6">
+          <h3 class="font-black text-lg">« Je vais devenir trop musclée »</h3>
+          <p class="mt-2 text-neutral-700 text-sm leading-relaxed">Une prise de muscle importante dépend surtout de la testostérone. Les femmes en produisent environ 15 à 20 fois moins que les hommes. Une portion de 20 à 25 g de protéines, associée à de la musculation, aide à réparer et entretenir la masse maigre : elle tonifie, elle ne « virilise » pas.</p>
+        </div>
+        <div class="border-2 border-black rounded-2xl p-6">
+          <h3 class="font-black text-lg">Plus de satiété, moins de fringales</h3>
+          <p class="mt-2 text-neutral-700 text-sm leading-relaxed">Digérer les protéines demande plus d'énergie que digérer les glucides ou les graisses (effet thermique : environ 20 à 30 % des calories des protéines, contre 5 à 10 % pour les glucides). Elles favorisent aussi les hormones de satiété (GLP-1, PYY) et freinent la ghréline, l'hormone de la faim. Un shaker en collation peut aider à tenir un déficit calorique.</p>
+        </div>
+        <div class="border-2 border-black rounded-2xl p-6">
+          <h3 class="font-black text-lg">Os et muscles sur le long terme</h3>
+          <p class="mt-2 text-neutral-700 text-sm leading-relaxed">Environ la moitié de la matrice osseuse est faite de protéines. Avec un apport adéquat (souvent 1,2 à 1,6 g par kg et par jour chez les personnes actives) et de l'activité physique, on soutient la densité osseuse et on limite la perte musculaire liée à l'âge, en particulier après la ménopause.</p>
+        </div>
+        <div class="border-2 border-black rounded-2xl p-6">
+          <h3 class="font-black text-lg">Digestion : pourquoi tester d'abord</h3>
+          <p class="mt-2 text-neutral-700 text-sm leading-relaxed">Les concentrés contiennent un peu de lactose. Certaines formules ajoutent des enzymes (DigeZyme®, bromélaïne, papaïne, lactase) pour faciliter la digestion. Tout le monde ne réagit pas pareil : les échantillons te permettent de vérifier ta tolérance avant d'investir dans un gros pot.</p>
+        </div>
+      </div>
+      <p class="mt-6 text-xs text-neutral-500 max-w-3xl">Contenu informatif uniquement. Pour un avis médical ou diététique adapté à ta situation (grossesse, pathologie rénale, allergie au lait…), consulte un professionnel de santé.</p>
+    </div>
+  </section>
+
+  <!-- Comment ça marche -->
+  <section class="max-w-6xl mx-auto px-4 py-16">
+    <h2 class="text-3xl font-black tracking-tight">Commander en 3 étapes</h2>
+    <ol class="mt-8 grid sm:grid-cols-3 gap-6">
+      <li class="border-2 border-black rounded-2xl p-6"><span class="text-red-600 font-black text-3xl">1</span><p class="mt-2 font-bold">Compose ton lot</p><p class="text-sm text-neutral-600">Au moins 3 échantillons, toutes marques et saveurs mélangées.</p></li>
+      <li class="border-2 border-black rounded-2xl p-6"><span class="text-red-600 font-black text-3xl">2</span><p class="mt-2 font-bold">Envoie-nous ta commande sur WhatsApp</p><p class="text-sm text-neutral-600">Le récapitulatif est déjà rédigé. On confirme avec toi et on te demande ta localisation GPS.</p></li>
+      <li class="border-2 border-black rounded-2xl p-6"><span class="text-red-600 font-black text-3xl">3</span><p class="mt-2 font-bold">Paie à la livraison</p><p class="text-sm text-neutral-600">Tu règles en espèces à la réception, livraison à 20 DH.</p></li>
+    </ol>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-black text-white">
+  <div class="max-w-6xl mx-auto px-4 py-12 grid sm:grid-cols-3 gap-8 text-sm">
+    <div>
+      <p class="font-black text-lg">TESTE <span class="text-red-500">TA WHEY</span></p>
+      <p class="mt-2 text-neutral-400">Échantillons de whey livrés au Maroc. Paiement à la livraison.</p>
+    </div>
+    <div>
+      <p class="font-bold mb-2">Sites officiels des marques</p>
+      <ul class="space-y-1 text-neutral-300">
+        <template x-for="(url, brand) in cfg.brandSites" :key="brand">
+          <li x-show="url"><a :href="url" target="_blank" rel="noopener" class="underline hover:text-red-400" x-text="brand"></a></li>
+        </template>
+      </ul>
+    </div>
+    <div>
+      <p class="font-bold mb-2">Suis-nous</p>
+      <p x-show="cfg.instagram"><a :href="cfg.instagram" target="_blank" rel="noopener" class="underline hover:text-red-400">Instagram</a></p>
+      <p class="mt-2"><a :href="`https://wa.me/${cfg.whatsapp}`" target="_blank" rel="noopener" class="underline hover:text-red-400">WhatsApp</a></p>
+    </div>
+  </div>
+</footer>
+
+<!-- Barre mobile -->
+<div class="sm:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t-2 border-black p-3" x-show="count>0 && !drawer">
+  <button @click="drawer=true" class="w-full rounded-full py-3 font-bold text-white" :class="unlocked ? 'bg-green-600' : 'bg-red-600'" x-text="unlocked ? `Voir mon panier · ${subtotal} DH` : `Encore ${missing} pour débloquer le lot`"></button>
+</div>
+
+<!-- Toast -->
+<div x-show="toast" x-transition class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-sm font-semibold rounded-full px-4 py-2 pop" role="status" x-text="toast"></div>
+
+<!-- Tiroir de validation -->
+<div x-show="drawer" class="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Récapitulatif de commande">
+  <div class="absolute inset-0 bg-black/50" @click="drawer=false" x-transition.opacity></div>
+  <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-white border-l-2 border-black flex flex-col"
+         x-show="drawer" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+    <div class="flex items-center justify-between p-4 border-b-2 border-black">
+      <h2 class="font-black text-lg">Mon lot</h2>
+      <button @click="drawer=false" class="text-2xl leading-none px-2" aria-label="Fermer">×</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4">
+      <p x-show="lines.length===0" class="text-neutral-500 text-sm">Ton panier est vide. Ajoute des échantillons depuis le catalogue.</p>
+      <ul class="divide-y divide-neutral-200">
+        <template x-for="l in lines" :key="l.s.id">
+          <li class="py-3 flex items-center justify-between gap-3">
+            <div>
+              <p class="font-bold text-sm" x-text="`${l.s.brand} — ${l.s.flavor}`"></p>
+              <p class="text-xs text-neutral-500" x-text="`${l.s.name} · ${l.s.portion}`"></p>
+            </div>
+            <div class="flex items-center border-2 border-black rounded-full overflow-hidden shrink-0">
+              <button @click="remove(l.s.id)" class="w-8 h-8 font-black hover:bg-black hover:text-white" aria-label="Retirer un">−</button>
+              <span class="w-6 text-center font-black text-sm tabular-nums" x-text="l.q"></span>
+              <button @click="add(l.s.id)" class="w-8 h-8 font-black hover:bg-black hover:text-white" aria-label="Ajouter un">+</button>
+            </div>
+          </li>
+        </template>
+      </ul>
+
+      <div x-show="lines.length>0" class="mt-4">
+        <button @click="clear()" class="text-xs underline text-neutral-500">Vider le lot</button>
+      </div>
+
+      <div x-show="lines.length>0" class="mt-6 space-y-3">
+        <label class="block text-sm font-semibold">Nom et prénom
+          <input type="text" x-model="form.name" autocomplete="name" class="mt-1 w-full border-2 border-black rounded-lg px-3 py-2 font-normal">
+        </label>
+        <label class="block text-sm font-semibold">Ville
+          <input type="text" x-model="form.city" autocomplete="address-level2" class="mt-1 w-full border-2 border-black rounded-lg px-3 py-2 font-normal">
+        </label>
+        <p class="text-xs text-neutral-500">Sur WhatsApp, on te demandera de partager ta localisation GPS pour une livraison sans erreur.</p>
+      </div>
+    </div>
+
+    <div class="border-t-2 border-black p-4 space-y-2">
+      <p x-show="!unlocked && lines.length>0" class="text-sm font-semibold text-red-600" x-text="`Ajoute encore ${missing} échantillon${missing>1?'s':''} pour valider.`"></p>
+      <div class="flex justify-between text-sm"><span>Sous-total</span><span class="font-bold tabular-nums" x-text="unlocked ? subtotal + ' DH' : '—'"></span></div>
+      <div class="flex justify-between text-sm"><span>Livraison</span><span class="font-bold tabular-nums" x-text="cfg.deliveryFee + ' DH'"></span></div>
+      <div class="flex justify-between text-lg font-black"><span>Total à la livraison</span><span class="tabular-nums" x-text="unlocked ? total + ' DH' : '—'"></span></div>
+      <button @click="send()" :disabled="!canSend"
+        class="w-full rounded-full py-3 font-bold text-white bg-red-600 hover:bg-red-700 transition disabled:bg-neutral-300 disabled:cursor-not-allowed">
+        Commander sur WhatsApp
+      </button>
+      <p x-show="unlocked && !canSend" class="text-xs text-neutral-500 text-center">Renseigne ton nom et ta ville pour continuer.</p>
+    </div>
+  </aside>
+</div>
+
+</body>
+</html>
