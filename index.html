@@ -10,7 +10,7 @@
   [x-cloak]{display:none!important}
   html{scroll-behavior:smooth}
   body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#fff;color:#0a0a0a}
-  .hero-shell{color:#fff;background:radial-gradient(ellipse at 12% 0%, rgba(220,38,38,.62), transparent 42%), linear-gradient(135deg, #151515 0%, #050505 72%); border:2px solid #1f1f1f; border-radius:1.5rem; box-shadow:0 0 0 1px rgba(239,68,68,.08), inset 0 0 30px rgba(239,68,68,.08)}
+  .hero-shell{color:#fff;background:linear-gradient(135deg, rgba(10,10,10,.35), rgba(10,10,10,.6)), url('assets/background.png') center/cover no-repeat; border:2px solid #1f1f1f; border-radius:1.5rem; box-shadow:0 0 0 1px rgba(239,68,68,.08), inset 0 0 30px rgba(239,68,68,.08)}
   .hero-shell .text-neutral-600, .hero-shell .text-neutral-500 { color:rgba(255,255,255,.72) !important }
   .hero-shell .text-black, .hero-shell strong.text-black { color:#fff !important }
   .hero-shell .border-black { border-color:rgba(255,255,255,.18) !important }
@@ -32,7 +32,24 @@
   .flipper{position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,.2,.2,1);height:21rem}
   .flipper.is-flipped{transform:rotateY(180deg)}
   .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid #0a0a0a;background:#fff;border-radius:1rem;overflow:hidden}
+  .face button{position:relative;overflow:hidden}
+  .face .product-image{position:absolute;inset:-6% 0 0 0;width:100%;height:115%;object-fit:cover;object-position:center;transform:scale(1.12)}
+  .face .product-text{position:relative;z-index:1;margin-top:auto;width:100%;padding:.65rem .75rem;border:1px solid rgba(0,0,0,.08);border-radius:.75rem;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.12)}
   .face.back{transform:rotateY(180deg)}
+  @media(max-width:640px){
+    .product-grid{gap:.75rem !important}
+    .flipper{height:19rem}
+    .face button{padding:.65rem}
+    .face .product-image{inset:-4% 0 0;height:108%;object-position:center 30%;transform:scale(1.05)}
+    .face .product-text{padding:.5rem .55rem}
+    .face .product-text>span:first-child{font-size:9px;overflow-wrap:anywhere}
+    .face .product-text>span:nth-child(2){font-size:1rem}
+    .face .product-text>span:last-child{font-size:10px}
+    .product-grid article>div+div button{min-height:44px}
+  }
+  @media(max-width:360px){
+    .flipper{height:21rem}
+  }
   @media (prefers-reduced-motion:reduce){.flipper{transition:none}}
   .bar{transition:width .4s ease, background-color .3s ease}
   .pop{animation:pop .35s ease}
@@ -244,11 +261,11 @@ function shop(){
                 <button type="button" class="w-full h-full flex flex-col items-center justify-between p-4 text-left" @click="flipped=true" :tabindex="flipped ? -1 : 0" :aria-label="`Voir les valeurs nutritionnelles : ${s.brand} ${s.flavor}`">
                   <span class="self-start text-[10px] font-bold uppercase tracking-widest border border-black rounded-full px-2 py-0.5" x-text="s.type"></span>
                   <!-- Sachet -->
-                  <img :src="s.image" :alt="`Image du produit ${s.brand} ${s.flavor}`" class="w-24 sm:w-32 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.18)]" />
-                  <span class="w-full">
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500" x-text="s.brand"></span>
-                    <span class="block font-black text-lg leading-tight" x-text="s.flavor"></span>
-                    <span class="block text-xs text-neutral-500 mt-1">Toucher pour voir le détail ↻</span>
+                  <img :src="s.image" :alt="`Image du produit ${s.brand} ${s.flavor}`" class="product-image drop-shadow-[0_8px_16px_rgba(0,0,0,0.18)]" />
+                  <span class="product-text">
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-700" x-text="s.brand"></span>
+                    <span class="block font-black text-lg leading-tight text-neutral-900" x-text="s.flavor"></span>
+                    <span class="block text-xs text-neutral-700 mt-1">Toucher pour voir le détail ↻</span>
                   </span>
                 </button>
               </div>
